@@ -53,7 +53,9 @@ export const extractOrdersFromFile = async (base64DataUrl: string): Promise<OCRR
 
   try {
     const text = response.text || '{"orders": []}';
-    return JSON.parse(text);
+    // Use regex to find the actual JSON block in case the model outputs preamble text
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    return JSON.parse(jsonMatch ? jsonMatch[0] : text);
   } catch (error) {
     console.error("OCR Extraction Error:", error);
     return { orders: [] };
@@ -107,9 +109,13 @@ export const getAIOrderInsights = async (orders: Order[]) => {
 
   try {
     const text = response.text;
-    if (!text) throw new Error("Null response");
-    const cleanedText = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(cleanedText);
+    if (!text) throw new Error("Null response from model");
+    
+    // Attempt to extract JSON from the text response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No valid JSON structure found in response");
+    
+    return JSON.parse(jsonMatch[0]);
   } catch (error) {
     console.error("Insight Analysis Error:", error);
     throw error;
