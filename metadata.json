@@ -1,0 +1,7 @@
+{
+  "name": "Order Manager",
+  "description": "Smart order management system with Gemini OCR, AI insights, and persistent local storage.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
